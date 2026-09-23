@@ -1,13 +1,16 @@
-const SIZE = { sm: 'h-7', md: 'h-9', lg: 'h-11' };
+const SIZE = { sm: 'h-6', md: 'h-8', lg: 'h-10' };
 
-/** Brand wordmark — orange "Holiday", navy "Along" with the rising swoosh. */
-export function Wordmark({ size = 'md', tag = 'Admin', className = '' }) {
+/**
+ * Brand wordmark for the admin app. The label sits under the logo so the
+ * whole block fits the 240px sidebar without overflowing.
+ */
+export function Wordmark({ size = 'md', tag = 'Admin panel', className = '' }) {
   return (
-    <span className={`flex items-center gap-2.5 ${className}`}>
+    <span className={`block ${className}`}>
       <img src="/logo.png" alt="Holiday Along Hotels" width="560" height="121"
-        className={`${SIZE[size] || SIZE.md} w-auto select-none`} />
+        className={`${SIZE[size] || SIZE.md} w-auto max-w-full select-none`} />
       {tag && (
-        <span className="rounded-md bg-brand-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-brand-700">
+        <span className="mt-2 block text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400">
           {tag}
         </span>
       )}
