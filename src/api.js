@@ -1,4 +1,5 @@
-const BASE = '/api';
+// Set VITE_API_BASE to point at a remote API; falls back to the dev proxy.
+const BASE = import.meta.env.VITE_API_BASE || '/api';
 export const TOKEN_KEY = 'aurelia_admin_token';
 
 export async function req(path, options = {}) {
