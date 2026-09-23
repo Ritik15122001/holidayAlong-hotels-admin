@@ -13,6 +13,8 @@ const nav = [
   { to: '/users', label: 'Users', icon: Users },
 ];
 
+const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://www.htlr.holidayalong.com/';
+
 export default function Shell() {
   const [open, setOpen] = useState(false);
   const logout = useAuth((s) => s.logout);
@@ -54,7 +56,7 @@ export default function Shell() {
         <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur lg:px-6">
           <button onClick={() => setOpen(true)} aria-label="Menu" className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100 lg:hidden"><Menu size={20} /></button>
           <h1 className="text-sm font-bold text-slate-900">{nav.find((n) => n.to === pathname)?.label || 'Admin'}</h1>
-          <a href="http://localhost:5173" target="_blank" rel="noreferrer" className="ml-auto text-[12px] font-semibold text-navy-700 hover:underline">View website ↗</a>
+          <a href={SITE_URL} target="_blank" rel="noreferrer" className="ml-auto text-[12px] font-semibold text-navy-700 hover:underline">View website ↗</a>
         </header>
         <main className="flex-1 p-4 lg:p-6"><Outlet /></main>
       </div>
