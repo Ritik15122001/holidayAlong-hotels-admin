@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building2, BedDouble, Utensils, MessageSquare, Users, LogOut, Menu, X, MapPin, Map, Briefcase, FileText } from 'lucide-react';
+import { LayoutDashboard, Building2, BedDouble, Utensils, MessageSquare, Users, LogOut, Menu, X, MapPin, Map, Briefcase, FileText, ScrollText } from 'lucide-react';
 import { Wordmark } from './Logo.jsx';
 import { useAuth } from '../store/useAdmin';
 
@@ -13,6 +13,7 @@ const nav = [
   { to: '/meal-plans', label: 'Meal Plans', icon: Utensils },
   { to: '/vendors', label: 'Vendors', icon: Briefcase },
   { to: '/brochures', label: 'Packages', icon: FileText },
+  { to: '/formats', label: 'Formats', icon: ScrollText },
   { to: '/leads', label: 'Bookings', icon: MessageSquare },
   { to: '/users', label: 'Users', icon: Users },
 ];
