@@ -8,13 +8,13 @@ const PRICE_FIELDS = [
 ];
 const EXTRA_FIELDS = [
   ['cnbPrice', 'CNB (child no bed)'], ['cwbPrice', 'CWB (child with bed)'],
-  ['adultExtraBedPrice', 'Adult extra bed'], ['childExtraBedPrice', 'Child extra bed'],
+  ['adultExtraBedPrice', 'Adult extra bed'],
 ];
 
 const blank = {
   roomTypeId: '', mealPlanId: '',
   singlePrice: 0, doublePrice: 0, triplePrice: 0, quadPrice: 0,
-  cnbPrice: 0, cwbPrice: 0, adultExtraBedPrice: 0, childExtraBedPrice: 0,
+  cnbPrice: 0, cwbPrice: 0, adultExtraBedPrice: 0,
   currency: 'INR', startDate: '', endDate: '', status: 'Active',
 };
 
