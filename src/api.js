@@ -39,6 +39,13 @@ export const api = {
   updateUser: (id, b) => req(`${A}/users/${id}`, { method: 'PUT', body: b }),
   userStatus: (id, status) => req(`${A}/users/${id}/status`, { method: 'PATCH', body: { status } }),
   deleteUser: (id) => req(`${A}/users/${id}`, { method: 'DELETE' }),
+  vendors: (p) => req(`${A}/vendors?` + new URLSearchParams(p)),
+  vendorHotels: (id) => req(`${A}/vendors/${id}/hotels`),
+  createVendor: (b) => req(`${A}/vendors`, { method: 'POST', body: b }),
+  updateVendor: (id, b) => req(`${A}/vendors/${id}`, { method: 'PUT', body: b }),
+  deleteVendor: (id) => req(`${A}/vendors/${id}`, { method: 'DELETE' }),
+  cities: () => req(`${A}/cities`),
+  locations: () => req(`${A}/locations`),
 };
 
 export const money = (n, c = 'INR') => (n == null ? '—' : ({ INR: '₹', AED: 'AED ', USD: '$' }[c] || '') + Number(n).toLocaleString('en-IN'));

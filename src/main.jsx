@@ -11,6 +11,9 @@ const Hotels = lazy(() => import('./pages/Hotels.jsx'));
 const Masters = lazy(() => import('./pages/Masters.jsx'));
 const Leads = lazy(() => import('./pages/Leads.jsx'));
 const UsersPage = lazy(() => import('./pages/Users.jsx'));
+const Places = lazy(() => import('./pages/Places.jsx'));
+const Vendors = lazy(() => import('./pages/Vendors.jsx'));
+const Brochures = lazy(() => import('./pages/Brochures.jsx'));
 
 const Loading = () => <div className="grid h-64 place-items-center"><div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-navy-900" /></div>;
 const S = (el) => <Suspense fallback={<Loading />}>{el}</Suspense>;
@@ -23,8 +26,12 @@ function App() {
       <Route element={<Shell />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/hotels" element={S(<Hotels />)} />
+        <Route path="/cities" element={S(<Places kind="cities" />)} />
+        <Route path="/locations" element={S(<Places kind="locations" />)} />
         <Route path="/room-types" element={S(<Masters kind="room-types" />)} />
         <Route path="/meal-plans" element={S(<Masters kind="meal-plans" />)} />
+        <Route path="/vendors" element={S(<Vendors />)} />
+        <Route path="/brochures" element={S(<Brochures />)} />
         <Route path="/leads" element={S(<Leads />)} />
         <Route path="/users" element={S(<UsersPage />)} />
         <Route path="*" element={<Navigate to="/" replace />} />

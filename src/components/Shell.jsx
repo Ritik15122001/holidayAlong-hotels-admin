@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building2, BedDouble, Utensils, MessageSquare, Users, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Building2, BedDouble, Utensils, MessageSquare, Users, LogOut, Menu, X, MapPin, Map, Briefcase, FileText } from 'lucide-react';
 import { Wordmark } from './Logo.jsx';
 import { useAuth } from '../store/useAdmin';
 
 const nav = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/hotels', label: 'Hotels', icon: Building2 },
+  { to: '/cities', label: 'Cities', icon: Map },
+  { to: '/locations', label: 'Locations', icon: MapPin },
   { to: '/room-types', label: 'Room Types', icon: BedDouble },
   { to: '/meal-plans', label: 'Meal Plans', icon: Utensils },
-  { to: '/leads', label: 'Leads', icon: MessageSquare },
+  { to: '/vendors', label: 'Vendors', icon: Briefcase },
+  { to: '/brochures', label: 'Packages', icon: FileText },
+  { to: '/leads', label: 'Bookings', icon: MessageSquare },
   { to: '/users', label: 'Users', icon: Users },
 ];
 

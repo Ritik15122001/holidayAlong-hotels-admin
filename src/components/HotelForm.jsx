@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trash2, Plus } from 'lucide-react';
 import { api } from '../api';
 import { Drawer, Field, Spinner } from './ui.jsx';
@@ -8,7 +8,7 @@ const AMENITIES = ['WiFi', 'Swimming Pool', 'Restaurant', 'Parking', 'Room Servi
 const blank = {
   name: '', city: '', location: '', starCategory: 4, description: '', address: '',
   phone: '', email: '', website: '', rating: 4.5, checkIn: '14:00', checkOut: '11:00',
-  amenities: [], images: [], status: 'Active',
+  amenities: [], images: [], vendorId: '', status: 'Active',
 };
 
 export default function HotelForm({ open, hotel, onClose, onSaved }) {
@@ -17,6 +17,16 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const [cities, setCities] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [vendors, setVendors] = useState([]);
+  useEffect(() => {
+    Promise.all([api.cities(), api.locations(), api.vendors({ limit: 200, type: 'Hotel' })])
+      .then(([c, l, v]) => { setCities(c); setLocations(l); setVendors(v.data || []); })
+      .catch(() => {});
+  }, []);
+  const cityLocations = locations.filter((l) => (l.cityId?.name || '') === form.city);
 
   const addImage = () => {
     const url = imgInput.trim();
@@ -47,8 +57,27 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
       </>}>
       <form id="hotel-form" onSubmit={save} className="grid grid-cols-2 gap-x-3 gap-y-3.5">
         <Field label="Hotel name *" className="col-span-2"><input required className="field" value={form.name} onChange={set('name')} /></Field>
-        <Field label="City *"><input required className="field" value={form.city} onChange={set('city')} /></Field>
-        <Field label="Location / area *"><input required className="field" value={form.location} onChange={set('location')} /></Field>
+        <Field label="City *">
+          <select required className="field" value={form.city}
+            onChange={(e) => setForm((f) => ({ ...f, city: e.target.value, location: '' }))}>
+            <option value="">Select a city…</option>
+            {cities.map((c) => <option key={c._id} value={c.name}>{c.name}{c.state ? ` — ${c.state}` : ''}</option>)}
+            {form.city && !cities.some((c) => c.name === form.city) && <option value={form.city}>{form.city}</option>}
+          </select>
+        </Field>
+        <Field label="Vendor">
+          <select className="field" value={form.vendorId || ''} onChange={set('vendorId')}>
+            <option value="">Not linked</option>
+            {vendors.map((v) => <option key={v._id} value={v._id}>{v.companyName}</option>)}
+          </select>
+        </Field>
+        <Field label="Location / area *">
+          <select required className="field" value={form.location} onChange={set('location')} disabled={!form.city}>
+            <option value="">{form.city ? 'Select a location…' : 'Choose a city first'}</option>
+            {cityLocations.map((l) => <option key={l._id} value={l.name}>{l.name}</option>)}
+            {form.location && !cityLocations.some((l) => l.name === form.location) && <option value={form.location}>{form.location}</option>}
+          </select>
+        </Field>
         <Field label="Star category *">
           <select className="field" value={form.starCategory} onChange={set('starCategory')}>
             {[5, 4, 3, 2, 1].map((s) => <option key={s} value={s}>{s} Star</option>)}
