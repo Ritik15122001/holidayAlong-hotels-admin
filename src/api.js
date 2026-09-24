@@ -60,6 +60,7 @@ export const api = {
   createVendor: (b) => req(`${A}/vendors`, { method: 'POST', body: b }),
   updateVendor: (id, b) => req(`${A}/vendors/${id}`, { method: 'PUT', body: b }),
   deleteVendor: (id) => req(`${A}/vendors/${id}`, { method: 'DELETE' }),
+  amenities: () => req(`${A}/amenities`),
   cities: () => req(`${A}/cities`),
   locations: () => req(`${A}/locations`),
 };

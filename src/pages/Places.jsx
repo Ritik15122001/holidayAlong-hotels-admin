@@ -3,6 +3,8 @@ import { Plus, Pencil, Trash2, MapPin, Building2, Loader2 } from 'lucide-react';
 import { api } from '../api';
 import { Modal, Field, Empty, StatusBadge, confirmDelete } from '../components/ui.jsx';
 import { fetchStates, fetchCities } from '../lib/geo.js';
+import Autocomplete from '../components/Autocomplete.jsx';
+import { searchPlaces } from '../lib/places.js';
 
 const CONFIG = {
   cities: { label: 'City', title: 'Cities', icon: Building2, hint: 'Pick a state, then a city from the free location directory' },
@@ -142,15 +144,14 @@ function PlaceForm({ kind, row, cities, onClose, onSaved }) {
               </select>
             </Field>
             <Field label="City *">
-              {options.length > 0 ? (
-                <select className="field" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}>
-                  <option value="">Select a city…</option>
-                  {options.map((c) => <option key={c}>{c}</option>)}
-                </select>
-              ) : (
-                <input className="field" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder={loadingGeo ? 'Loading cities…' : 'Pick a state, or type the city'} />
-              )}
+              <Autocomplete
+                value={form.name}
+                onChange={(v) => setForm({ ...form, name: v })}
+                options={options}
+                fetchOptions={(q) => searchPlaces(q, form.state)}
+                placeholder={loadingGeo ? 'Loading cities…' : 'Start typing a city…'}
+                emptyHint="Keep typing to search the map"
+              />
               {geoError && <p className="mt-1.5 text-[11.5px] text-amber-700">{geoError} — you can still type the city by hand.</p>}
             </Field>
           </>
@@ -163,8 +164,13 @@ function PlaceForm({ kind, row, cities, onClose, onSaved }) {
               </select>
             </Field>
             <Field label="Location *">
-              <input className="field" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g. Police Bazar, Candolim Beach" />
+              <Autocomplete
+                value={form.name}
+                onChange={(v) => setForm({ ...form, name: v })}
+                fetchOptions={(q) => searchPlaces(q, cities.find((c) => c._id === form.cityId)?.name || '')}
+                placeholder="e.g. Police Bazar, Candolim Beach"
+                emptyHint="Keep typing to search the map"
+              />
             </Field>
           </>
         )}

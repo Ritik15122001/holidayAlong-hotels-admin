@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Trash2, Plus, Upload, Loader2, ImagePlus } from 'lucide-react';
+import { Trash2, Plus, Loader2, ImagePlus } from 'lucide-react';
+import { iconFor } from '../lib/icons.js';
+import Autocomplete from './Autocomplete.jsx';
+import { searchPlaces } from '../lib/places.js';
 import { api, uploadFiles } from '../api';
 import { Drawer, Field, Spinner } from './ui.jsx';
 
-const AMENITIES = ['WiFi', 'Swimming Pool', 'Restaurant', 'Parking', 'Room Service', 'Air Conditioning', 'Gym', 'Spa'];
 
 const blank = {
   name: '', city: '', location: '', starCategory: 4, description: '', address: '',
@@ -38,9 +40,25 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
   const [cities, setCities] = useState([]);
   const [locations, setLocations] = useState([]);
   const [vendors, setVendors] = useState([]);
+  const [amenities, setAmenities] = useState([]);
+  const [newAmenity, setNewAmenity] = useState('');
+
+  // Lets you add a missing facility without leaving the hotel form.
+  const addAmenity = async () => {
+    const name = newAmenity.trim();
+    if (!name) return;
+    if (!amenities.some((a) => a.name.toLowerCase() === name.toLowerCase())) {
+      try {
+        const created = await api.create('amenities', { name, sortOrder: (amenities.length + 1) * 10 });
+        setAmenities((list) => [...list, created]);
+      } catch { /* already exists */ }
+    }
+    setForm((f) => (f.amenities.includes(name) ? f : { ...f, amenities: [...f.amenities, name] }));
+    setNewAmenity('');
+  };
   useEffect(() => {
-    Promise.all([api.cities(), api.locations(), api.vendors({ limit: 200, type: 'Hotel' })])
-      .then(([c, l, v]) => { setCities(c); setLocations(l); setVendors(v.data || []); })
+    Promise.all([api.cities(), api.locations(), api.vendors({ limit: 200, type: 'Hotel' }), api.amenities()])
+      .then(([c, l, v, a]) => { setCities(c); setLocations(l); setVendors(v.data || []); setAmenities(a); })
       .catch(() => {});
   }, []);
   const cityLocations = locations.filter((l) => (l.cityId?.name || '') === form.city);
@@ -69,12 +87,13 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
       <form id="hotel-form" onSubmit={save} className="grid grid-cols-2 gap-x-3 gap-y-3.5">
         <Field label="Hotel name *" className="col-span-2"><input required className="field" value={form.name} onChange={set('name')} /></Field>
         <Field label="City *">
-          <select required className="field" value={form.city}
-            onChange={(e) => setForm((f) => ({ ...f, city: e.target.value, location: '' }))}>
-            <option value="">Select a city…</option>
-            {cities.map((c) => <option key={c._id} value={c.name}>{c.name}{c.state ? ` — ${c.state}` : ''}</option>)}
-            {form.city && !cities.some((c) => c.name === form.city) && <option value={form.city}>{form.city}</option>}
-          </select>
+          <Autocomplete
+            value={form.city}
+            onChange={(v) => setForm((f) => ({ ...f, city: v, location: '' }))}
+            options={cities.map((c) => c.name)}
+            placeholder="Start typing a city…"
+            emptyHint="No match — you can still type a city"
+          />
         </Field>
         <Field label="Vendor">
           <select className="field" value={form.vendorId || ''} onChange={set('vendorId')}>
@@ -83,11 +102,15 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
           </select>
         </Field>
         <Field label="Location / area *">
-          <select required className="field" value={form.location} onChange={set('location')} disabled={!form.city}>
-            <option value="">{form.city ? 'Select a location…' : 'Choose a city first'}</option>
-            {cityLocations.map((l) => <option key={l._id} value={l.name}>{l.name}</option>)}
-            {form.location && !cityLocations.some((l) => l.name === form.location) && <option value={form.location}>{form.location}</option>}
-          </select>
+          <Autocomplete
+            value={form.location}
+            onChange={(v) => setForm((f) => ({ ...f, location: v }))}
+            options={cityLocations.map((l) => l.name)}
+            fetchOptions={(q) => searchPlaces(q, form.city)}
+            disabled={!form.city}
+            placeholder={form.city ? 'Start typing an area or landmark…' : 'Choose a city first'}
+            emptyHint="Keep typing to search the map"
+          />
         </Field>
         <Field label="Star category *">
           <select className="field" value={form.starCategory} onChange={set('starCategory')}>
@@ -108,16 +131,31 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
 
         <Field label="Amenities" className="col-span-2">
           <div className="flex flex-wrap gap-1.5">
-            {AMENITIES.map((a) => {
-              const on = form.amenities.includes(a);
+            {amenities.map((a) => {
+              const on = form.amenities.includes(a.name);
+              const Icon = iconFor(a.icon);
               return (
-                <button type="button" key={a}
-                  onClick={() => setForm((f) => ({ ...f, amenities: on ? f.amenities.filter((x) => x !== a) : [...f.amenities, a] }))}
-                  className={`rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold transition ${on ? 'border-navy-900 bg-navy-900 text-white' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>
-                  {a}
+                <button type="button" key={a._id}
+                  onClick={() => setForm((f) => ({ ...f, amenities: on ? f.amenities.filter((x) => x !== a.name) : [...f.amenities, a.name] }))}
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold transition ${on ? 'border-navy-900 bg-navy-900 text-white' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>
+                  <Icon size={13} /> {a.name}
                 </button>
               );
             })}
+            {/* anything saved on this hotel that is no longer in the master */}
+            {form.amenities.filter((n) => !amenities.some((a) => a.name === n)).map((n) => (
+              <button type="button" key={n}
+                onClick={() => setForm((f) => ({ ...f, amenities: f.amenities.filter((x) => x !== n) }))}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[12px] font-semibold text-amber-800">
+                {n} <Trash2 size={12} />
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 flex gap-2">
+            <input className="field" value={newAmenity} onChange={(e) => setNewAmenity(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addAmenity())}
+              placeholder="Add a new amenity — it is saved to the master list" />
+            <button type="button" onClick={addAmenity} className="btn-outline shrink-0"><Plus size={15} /> Add</button>
           </div>
         </Field>
 
