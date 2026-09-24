@@ -5,6 +5,7 @@ import { useHotels } from '../store/useAdmin';
 import { Pager, Empty, StatusBadge, confirmDelete } from '../components/ui.jsx';
 import HotelForm from '../components/HotelForm.jsx';
 import PriceForm from '../components/PriceForm.jsx';
+import PriceImport from '../components/PriceImport.jsx';
 
 export default function Hotels() {
   const st = useHotels();
@@ -73,6 +74,7 @@ export default function Hotels() {
               {expanded === h._id && (
                 <div className="border-t border-slate-200 bg-slate-50/70 px-3 py-3">
                   <p className="mb-2 text-[12px] font-bold uppercase tracking-wide text-slate-500">{h.name} — prices</p>
+                  <PriceImport hotel={h} prices={pricesByHotel[h._id]} onImported={() => { st.reloadPrices(h._id); st.fetch(); }} />
                   <PriceRows hotel={h} prices={pricesByHotel[h._id]} onEdit={(p) => setPriceForm({ hotel: h, price: p })} reload={() => st.reloadPrices(h._id)} />
                 </div>
               )}
