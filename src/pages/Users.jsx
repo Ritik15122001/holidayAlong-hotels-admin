@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { Search, Trash2, UserRound, Ban, CheckCircle2, Mail, Phone } from 'lucide-react';
+import { Search, Trash2, UserRound, Ban, CheckCircle2, Mail, Phone, Plus, Pencil } from 'lucide-react';
 import { api, fmtDate } from '../api';
 import { useUsers } from '../store/useAdmin';
 import { Pager, Empty, confirmDelete } from '../components/ui.jsx';
+import UserForm from '../components/UserForm.jsx';
 
 const initials = (name = '') =>
   name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '?';
@@ -11,6 +12,7 @@ export default function Users() {
   const st = useUsers();
   const { rows, total, page, pages, q, status, loading } = st;
   const [busy, setBusy] = useState('');
+  const [editing, setEditing] = useState(null); // null = closed, {} = new, {…} = edit
   const first = useRef(true);
 
   useEffect(() => {
@@ -45,13 +47,14 @@ export default function Users() {
           <option>Blocked</option>
         </select>
         <span className="text-[12px] text-slate-500">{total} registered user{total === 1 ? '' : 's'}</span>
+        <button onClick={() => setEditing({})} className="btn-primary ml-auto !py-2.5"><Plus size={15} /> Add user</button>
       </div>
 
       <div className="card overflow-hidden">
         {loading ? (
           <div className="space-y-px">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-12 animate-pulse bg-slate-100" />)}</div>
         ) : rows.length === 0 ? (
-          <Empty icon={UserRound} title="No users found" sub="Guests who sign up on the website appear here." />
+          <Empty icon={UserRound} title="No users yet" sub="Use “Add user” to create a login for the customer website." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[860px]">
@@ -89,6 +92,10 @@ export default function Users() {
                     <td className="td text-slate-600">{u.lastLoginAt ? fmtDate(u.lastLoginAt) : '—'}</td>
                     <td className="td">
                       <div className="flex justify-end gap-1.5">
+                        <button onClick={() => setEditing(u)} title="Edit user"
+                          className="rounded-lg border border-slate-200 p-1.5 text-slate-500 transition hover:border-brand-200 hover:text-brand-700">
+                          <Pencil size={15} />
+                        </button>
                         <button onClick={() => toggle(u)} disabled={busy === u._id}
                           title={u.status === 'Active' ? 'Block this user' : 'Unblock this user'}
                           className={`rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold transition disabled:opacity-50 ${
@@ -112,6 +119,13 @@ export default function Users() {
       </div>
 
       <Pager page={page} pages={pages} onChange={st.setPage} />
+
+      <UserForm
+        open={editing !== null}
+        user={editing}
+        onClose={() => setEditing(null)}
+        onSaved={st.fetch}
+      />
     </div>
   );
 }

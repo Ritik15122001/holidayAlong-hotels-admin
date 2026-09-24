@@ -35,6 +35,8 @@ export const api = {
   leadStatus: (id, status) => req(`${A}/leads/${id}/status`, { method: 'PUT', body: { status } }),
   deleteLead: (id) => req(`${A}/leads/${id}`, { method: 'DELETE' }),
   users: (p) => req(`${A}/users?` + new URLSearchParams(p)),
+  createUser: (b) => req(`${A}/users`, { method: 'POST', body: b }),
+  updateUser: (id, b) => req(`${A}/users/${id}`, { method: 'PUT', body: b }),
   userStatus: (id, status) => req(`${A}/users/${id}/status`, { method: 'PATCH', body: { status } }),
   deleteUser: (id) => req(`${A}/users/${id}`, { method: 'DELETE' }),
 };
