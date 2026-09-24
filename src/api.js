@@ -2,6 +2,21 @@
 const BASE = import.meta.env.VITE_API_BASE || '/api';
 export const TOKEN_KEY = 'aurelia_admin_token';
 
+/** Multipart upload — no JSON content-type, the browser sets the boundary. */
+export async function uploadFiles(files) {
+  const fd = new FormData();
+  for (const f of files) fd.append('files', f);
+  const token = localStorage.getItem(TOKEN_KEY);
+  const res = await fetch(BASE + '/admin/uploads', {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: fd,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Upload failed');
+  return data.urls;
+}
+
 export async function req(path, options = {}) {
   const token = localStorage.getItem(TOKEN_KEY);
   const res = await fetch(BASE + path, {

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Trash2, Plus } from 'lucide-react';
-import { api } from '../api';
+import { useEffect, useRef, useState } from 'react';
+import { Trash2, Plus, Upload, Loader2, ImagePlus } from 'lucide-react';
+import { api, uploadFiles } from '../api';
 import { Drawer, Field, Spinner } from './ui.jsx';
 
 const AMENITIES = ['WiFi', 'Swimming Pool', 'Restaurant', 'Parking', 'Room Service', 'Air Conditioning', 'Gym', 'Spa'];
@@ -13,7 +13,24 @@ const blank = {
 
 export default function HotelForm({ open, hotel, onClose, onSaved }) {
   const [form, setForm] = useState(() => ({ ...blank, ...(hotel || {}) }));
-  const [imgInput, setImgInput] = useState('');
+  const fileRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [imgError, setImgError] = useState('');
+
+  const pickFiles = async (e) => {
+    const files = [...(e.target.files || [])];
+    e.target.value = '';
+    if (!files.length) return;
+    setUploading(true); setImgError('');
+    try {
+      const urls = await uploadFiles(files);
+      setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
+    } catch (err) {
+      setImgError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -28,12 +45,6 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
   }, []);
   const cityLocations = locations.filter((l) => (l.cityId?.name || '') === form.city);
 
-  const addImage = () => {
-    const url = imgInput.trim();
-    if (!url) return;
-    setForm((f) => ({ ...f, images: [...f.images, url] }));
-    setImgInput('');
-  };
 
   const save = async (e) => {
     e.preventDefault();
@@ -110,12 +121,14 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
           </div>
         </Field>
 
-        <Field label="Hotel images (URLs)" className="col-span-2">
-          <div className="flex gap-2">
-            <input className="field" value={imgInput} onChange={(e) => setImgInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())} placeholder="https://images.pexels.com/…" />
-            <button type="button" onClick={addImage} className="btn-outline shrink-0"><Plus size={15} /> Add</button>
-          </div>
+        <Field label="Hotel images" className="col-span-2">
+          <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-[13px] font-semibold text-slate-600 transition hover:border-brand-400 hover:text-brand-700 disabled:opacity-60">
+            {uploading ? <><Loader2 size={16} className="animate-spin" /> Uploading…</> : <><ImagePlus size={17} /> Choose images to upload</>}
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" multiple onChange={pickFiles} className="hidden" />
+          <p className="mt-1.5 text-[11.5px] text-slate-500">JPG, PNG, WebP, GIF or AVIF · up to 5 MB each · select several at once.</p>
+          {imgError && <p className="mt-1.5 rounded-lg bg-red-50 px-3 py-2 text-[12.5px] text-red-700">{imgError}</p>}
           {form.images.length > 0 && (
             <div className="mt-2.5 grid grid-cols-4 gap-2">
               {form.images.map((src, i) => (
