@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, toInput } from '../api';
 import { Drawer, Field, Spinner } from './ui.jsx';
+import DateRange from './DateRange.jsx';
 import { useMasters } from '../store/useAdmin';
 
 const PRICE_FIELDS = [
@@ -114,8 +115,14 @@ export default function PriceForm({ open, hotel, price, onClose, onSaved }) {
             <Field label="Status">
               <select className="field" value={form.status} onChange={set('status')}><option>Active</option><option>Inactive</option></select>
             </Field>
-            <Field label="Start date *"><input required type="date" className="field" value={form.startDate} onChange={set('startDate')} /></Field>
-            <Field label="End date *"><input required type="date" className="field" min={form.startDate} value={form.endDate} onChange={set('endDate')} /></Field>
+            <Field label="Validity *" className="col-span-2">
+              <DateRange
+                from={form.startDate}
+                to={form.endDate}
+                onChange={({ startDate, endDate }) => setForm((f) => ({ ...f, startDate, endDate }))}
+                placeholder="Pick the dates this rate applies"
+              />
+            </Field>
           </div>
         </Section>
 

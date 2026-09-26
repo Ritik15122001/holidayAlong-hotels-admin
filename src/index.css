@@ -21,3 +21,25 @@
   .th { @apply whitespace-nowrap px-3 py-2.5 text-left text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500; }
   .td { @apply whitespace-nowrap px-3 py-2.5 text-[13px] text-slate-700; }
 }
+
+/* react-day-picker, themed for the admin panel */
+.rdp-root {
+  --rdp-accent-color: #1466e3;
+  --rdp-accent-background-color: #eaf2fe;
+  --rdp-day-height: 36px;
+  --rdp-day-width: 36px;
+  --rdp-day_button-height: 32px;
+  --rdp-day_button-width: 32px;
+  --rdp-font-family: inherit;
+  width: max-content;
+  font-size: 13px;
+}
+/* the library stacks months in a column by default */
+.rdp-root .rdp-months { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 1.25rem; }
+.rdp-month_caption { font-weight: 800; color: #0f172a; font-size: 13px; }
+.rdp-weekday { color: #94a3b8; font-weight: 700; font-size: 11px; text-transform: uppercase; }
+.rdp-ha-selected .rdp-day_button { border-radius: 8px; }
+.rdp-ha-edge .rdp-day_button { background: #1466e3; color: #fff; font-weight: 700; }
+.rdp-ha-middle .rdp-day_button { background: #eaf2fe; color: #12459b; border-radius: 0; }
+.rdp-ha-today .rdp-day_button { font-weight: 800; color: #f97316; }
+.rdp-day_button:hover:not([disabled]) { background: #f1f5f9; }
