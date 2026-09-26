@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Plus, Pencil, Trash2, Search, Briefcase, ChevronDown, Building2, Loader2,
-  Phone, Mail, Globe, MapPin, Landmark,
+  Phone, Mail, Globe, MapPin, Landmark, CreditCard,
 } from 'lucide-react';
 import { api } from '../api';
 import { Drawer, Field, Empty, StatusBadge, Pager, confirmDelete } from '../components/ui.jsx';
@@ -105,6 +105,29 @@ export default function Vendors() {
                     {expanded === v._id && (
                       <tr key={v._id + '-h'} className="bg-slate-50/70">
                         <td colSpan={7} className="px-4 py-3">
+                          <div className="mb-3 rounded-lg border border-slate-200 bg-white p-3">
+                            <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                              <CreditCard size={13} className="text-brand-600" /> Account details
+                            </p>
+                            {[v.gstPan, v.accountNumber, v.bankName, v.ifsc, v.upi].some(Boolean) ? (
+                              <dl className="grid gap-x-6 gap-y-2 text-[12.5px] sm:grid-cols-3 lg:grid-cols-5">
+                                {[['GST / PAN', v.gstPan], ['Account number', v.accountNumber], ['Bank', v.bankName],
+                                  ['IFSC', v.ifsc], ['UPI', v.upi]].map(([k, val]) => (
+                                  <div key={k}>
+                                    <dt className="text-[10.5px] uppercase tracking-wide text-slate-400">{k}</dt>
+                                    <dd className="font-semibold text-slate-800">{val || '—'}</dd>
+                                  </div>
+                                ))}
+                              </dl>
+                            ) : (
+                              <p className="text-[12.5px] text-slate-500">No account details saved yet — add them with Edit.</p>
+                            )}
+                            <p className="mt-2 text-[11px] text-slate-400">Admin only — these are never sent to the website.</p>
+                          </div>
+
+                          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                            <Building2 size={13} className="text-brand-600" /> Linked hotels
+                          </p>
                           {!hotels[v._id] ? (
                             <p className="flex items-center gap-2 text-[13px] text-slate-500"><Loader2 size={14} className="animate-spin" /> Loading hotels…</p>
                           ) : hotels[v._id].length === 0 ? (
