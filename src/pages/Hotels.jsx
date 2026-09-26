@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, Search, Tags, Pencil, Trash2, ChevronDown, Building2, Star } from 'lucide-react';
+import { Plus, Search, Tags, Pencil, Trash2, ChevronDown, Building2, Star, Copy } from 'lucide-react';
 import { api, money, fmtDate } from '../api';
 import { useHotels } from '../store/useAdmin';
 import { Pager, Empty, StatusBadge, confirmDelete } from '../components/ui.jsx';
@@ -75,7 +75,9 @@ export default function Hotels() {
                 <div className="border-t border-slate-200 bg-slate-50/70 px-3 py-3">
                   <p className="mb-2 text-[12px] font-bold uppercase tracking-wide text-slate-500">{h.name} — prices</p>
                   <PriceImport hotel={h} prices={pricesByHotel[h._id]} onImported={() => { st.reloadPrices(h._id); st.fetch(); }} />
-                  <PriceRows hotel={h} prices={pricesByHotel[h._id]} onEdit={(p) => setPriceForm({ hotel: h, price: p })} reload={() => st.reloadPrices(h._id)} />
+                  <PriceRows hotel={h} prices={pricesByHotel[h._id]} onEdit={(p) => setPriceForm({ hotel: h, price: p })}
+                    onDuplicate={(p) => setPriceForm({ hotel: h, price: { ...p, _id: undefined } })}
+                    reload={() => st.reloadPrices(h._id)} />
                 </div>
               )}
             </div>
@@ -96,7 +98,7 @@ export default function Hotels() {
   );
 }
 
-function PriceRows({ prices, onEdit, reload }) {
+function PriceRows({ prices, onEdit, onDuplicate, reload }) {
   if (!prices) return <p className="py-3 text-[13px] text-slate-500">Loading prices…</p>;
   if (!prices.length) return <p className="py-3 text-[13px] text-slate-500">No price records yet. Use “Add price” to create one.</p>;
 
@@ -133,6 +135,7 @@ function PriceRows({ prices, onEdit, reload }) {
               <td className="td">
                 <div className="flex justify-end gap-1.5">
                   <button onClick={() => onEdit(p)} className="btn-outline btn-sm"><Pencil size={12} /> Edit</button>
+                  <button onClick={() => onDuplicate(p)} title="Copy this rate into a new one" className="btn-outline btn-sm"><Copy size={12} /> Copy</button>
                   <button onClick={() => del(p)} className="btn-danger btn-sm"><Trash2 size={12} /></button>
                 </div>
               </td>

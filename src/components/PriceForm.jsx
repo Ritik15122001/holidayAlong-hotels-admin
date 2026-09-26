@@ -64,7 +64,8 @@ export default function PriceForm({ open, hotel, price, onClose, onSaved }) {
 
   return (
     <Drawer open={open} onClose={onClose} width="max-w-lg"
-      title={price ? 'Edit price' : 'Add price'} subtitle={hotel?.name}
+      title={price?._id ? 'Edit price' : price ? 'Duplicate price' : 'Add price'}
+      subtitle={price && !price._id ? `${hotel?.name} — saves as a new rate` : hotel?.name}
       footer={<>
         <button onClick={onClose} className="btn-outline">Cancel</button>
         <button form="price-form" disabled={busy} className="btn-primary">{busy && <Spinner />} Save price</button>
