@@ -77,17 +77,24 @@ function BrochureForm({ row, onClose, onSaved }) {
   const [error, setError] = useState('');
   const fileRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const pickFile = async (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
+  const send = async (file) => {
     if (!file) return;
     setUploading(true); setError('');
     try {
       const [url] = await uploadFiles([file]);
       setForm((f) => ({ ...f, fileUrl: url, title: f.title || file.name.replace(/\.[^.]+$/, '') }));
     } catch (err) { setError(err.message); } finally { setUploading(false); }
+  };
+
+  const pickFile = (e) => { const file = e.target.files?.[0]; e.target.value = ''; send(file); };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    send(e.dataTransfer?.files?.[0]);
   };
 
   const save = async () => {
@@ -119,10 +126,23 @@ function BrochureForm({ row, onClose, onSaved }) {
         </Field>
         <Field label="File *">
           <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-[13px] font-semibold text-slate-600 transition hover:border-brand-400 hover:text-brand-700 disabled:opacity-60">
-            {uploading ? <><Loader2 size={16} className="animate-spin" /> Uploading…</> : <><Upload size={16} /> {form.fileUrl ? 'Replace file' : 'Upload a PDF or Word file'}</>}
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={onDrop}
+            className={`flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-6 text-[13px] font-semibold transition disabled:opacity-60 ${
+              dragging ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-300 bg-slate-50 text-slate-600 hover:border-brand-400 hover:text-brand-700'}`}>
+            {uploading ? (
+              <><Loader2 size={18} className="animate-spin" /> Uploading…</>
+            ) : (
+              <>
+                <Upload size={18} />
+                {form.fileUrl ? 'Replace file' : 'Drag a PDF or Word file here'}
+                <span className="text-[11.5px] font-normal text-slate-500">or click to browse your computer</span>
+              </>
+            )}
           </button>
-          <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,application/pdf" onChange={pickFile} className="hidden" />
+          <input ref={fileRef} type="file" onChange={pickFile} className="hidden"
+            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
           {form.fileUrl && (
             <p className="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-emerald-700">
               <FileText size={12} /> <a href={form.fileUrl} target="_blank" rel="noreferrer" className="truncate hover:underline">{form.fileUrl.split('/').pop()}</a>

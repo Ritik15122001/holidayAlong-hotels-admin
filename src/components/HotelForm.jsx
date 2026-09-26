@@ -17,11 +17,10 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
   const [form, setForm] = useState(() => ({ ...blank, ...(hotel || {}) }));
   const fileRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [imgError, setImgError] = useState('');
 
-  const pickFiles = async (e) => {
-    const files = [...(e.target.files || [])];
-    e.target.value = '';
+  const sendFiles = async (files) => {
     if (!files.length) return;
     setUploading(true); setImgError('');
     try {
@@ -32,6 +31,13 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
     } finally {
       setUploading(false);
     }
+  };
+
+  const pickFiles = (e) => { const files = [...(e.target.files || [])]; e.target.value = ''; sendFiles(files); };
+  const onDropImages = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    sendFiles([...(e.dataTransfer?.files || [])].filter((f) => f.type.startsWith('image/')));
   };
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -216,8 +222,20 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
 
         <Field label="Hotel images" className="col-span-2">
           <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-[13px] font-semibold text-slate-600 transition hover:border-brand-400 hover:text-brand-700 disabled:opacity-60">
-            {uploading ? <><Loader2 size={16} className="animate-spin" /> Uploading…</> : <><ImagePlus size={17} /> Choose images to upload</>}
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={onDropImages}
+            className={`flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-6 text-[13px] font-semibold transition disabled:opacity-60 ${
+              dragging ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-300 bg-slate-50 text-slate-600 hover:border-brand-400 hover:text-brand-700'}`}>
+            {uploading ? (
+              <><Loader2 size={18} className="animate-spin" /> Uploading…</>
+            ) : (
+              <>
+                <ImagePlus size={18} />
+                Drag images here
+                <span className="text-[11.5px] font-normal text-slate-500">or click to browse your computer</span>
+              </>
+            )}
           </button>
           <input ref={fileRef} type="file" accept="image/*" multiple onChange={pickFiles} className="hidden" />
           <p className="mt-1.5 text-[11.5px] text-slate-500">JPG, PNG, WebP, GIF or AVIF · up to 5 MB each · select several at once.</p>
