@@ -10,7 +10,7 @@ import { Drawer, Field, Spinner } from './ui.jsx';
 const blank = {
   name: '', city: '', location: '', starCategory: 4, description: '', address: '',
   phone: '', email: '', website: '', rating: 4.5, checkIn: '14:00', checkOut: '11:00',
-  amenities: [], images: [], vendorId: '', status: 'Active',
+  amenities: [], images: [], vendorId: '', googlePlaceId: '', status: 'Active',
 };
 
 export default function HotelForm({ open, hotel, onClose, onSaved }) {
@@ -173,6 +173,13 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
         <Field label="Contact phone"><input className="field" value={form.phone} onChange={set('phone')} /></Field>
         <Field label="Contact email"><input type="email" className="field" value={form.email} onChange={set('email')} /></Field>
         <Field label="Website"><input className="field" value={form.website} onChange={set('website')} placeholder="https://" /></Field>
+        <Field label="Google Place ID" className="col-span-2">
+          <input className="field" value={form.googlePlaceId || ''} onChange={set('googlePlaceId')}
+            placeholder="ChIJ… — find it with Google's Place ID finder" />
+          <p className="mt-1.5 text-[11.5px] text-slate-500">
+            Set this to show the hotel's live Google rating on the website. Needs GOOGLE_MAPS_API_KEY on the server.
+          </p>
+        </Field>
         <Field label="Guest rating"><input type="number" step="0.1" min="0" max="5" className="field" value={form.rating} onChange={set('rating')} /></Field>
         <Field label="Check-in"><input type="time" className="field" value={form.checkIn} onChange={set('checkIn')} /></Field>
         <Field label="Check-out"><input type="time" className="field" value={form.checkOut} onChange={set('checkOut')} /></Field>

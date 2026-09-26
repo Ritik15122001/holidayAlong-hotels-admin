@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Search, Eye, Trash2, Inbox } from 'lucide-react';
+import { Search, Eye, Trash2, Inbox, UserRound } from 'lucide-react';
 import { api, fmtDate } from '../api';
 import { useLeads } from '../store/useAdmin';
 import { Modal, Pager, Empty, confirmDelete } from '../components/ui.jsx';
@@ -32,7 +32,7 @@ export default function Leads() {
       <div className="card flex flex-wrap items-center gap-2.5 p-3">
         <div className="relative min-w-[200px] flex-1">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input className="field !pl-9" placeholder="Search name, email, phone or hotel" value={q} onChange={(e) => st.setQuery({ q: e.target.value })} />
+          <input className="field !pl-9" placeholder="Search guest, account, phone or hotel" value={q} onChange={(e) => st.setQuery({ q: e.target.value })} />
         </div>
         <select className="field !w-auto" value={status} onChange={(e) => st.setQuery({ status: e.target.value })}>
           <option value="">All statuses</option>{STATUSES.map((s) => <option key={s}>{s}</option>)}
@@ -49,14 +49,23 @@ export default function Leads() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1000px]">
               <thead className="bg-slate-50"><tr>
-                {['Name', 'Phone', 'Email', 'Hotel', 'Check-in', 'Check-out', 'Room / Meal', 'Status', 'Created', ''].map((h, i) => <th key={i} className="th">{h}</th>)}
+                {['Guest', 'Submitted by', 'Phone', 'Hotel', 'Check-in', 'Check-out', 'Room / Meal', 'Status', 'Created', ''].map((h, i) => <th key={i} className="th">{h}</th>)}
               </tr></thead>
               <tbody>
                 {rows.map((l) => (
                   <tr key={l._id} className="border-t border-slate-100 hover:bg-slate-50/70">
-                    <td className="td font-semibold text-slate-900">{l.name}</td>
+                    <td className="td">
+                      <p className="font-semibold text-slate-900">{l.name}</p>
+                      <p className="text-[11.5px] text-slate-500">{l.email}</p>
+                    </td>
+                    <td className="td">
+                      {l.userName ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-md bg-brand-50 px-2 py-1 text-[11.5px] font-bold text-brand-700">
+                          <UserRound size={11} /> {l.userName}
+                        </span>
+                      ) : <span className="text-slate-400">—</span>}
+                    </td>
                     <td className="td">{l.phone}</td>
-                    <td className="td text-slate-600">{l.email}</td>
                     <td className="td">{l.hotelName || l.hotelId?.name || '—'}</td>
                     <td className="td">{fmtDate(l.checkIn)}</td>
                     <td className="td">{fmtDate(l.checkOut)}</td>
@@ -99,6 +108,7 @@ export default function Leads() {
             <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[13px]">
               {[
                 ['Email', view.email], ['Phone', view.phone],
+                ['Submitted by', view.userName], ['Account email', view.userEmail],
                 ['Alternate phone', view.altPhone], ['Created', fmtDate(view.createdAt)],
                 ['Address', view.address], ['City', view.city],
                 ['State', view.state], ['Country', view.country],
