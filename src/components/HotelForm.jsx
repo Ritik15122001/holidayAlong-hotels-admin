@@ -43,6 +43,32 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
   const [amenities, setAmenities] = useState([]);
   const [newAmenity, setNewAmenity] = useState('');
 
+  const [savingPlace, setSavingPlace] = useState('');
+
+  /** Saves the typed city into the city master. */
+  const addCity = async () => {
+    const name = form.city.trim();
+    if (!name || cities.some((c) => c.name.toLowerCase() === name.toLowerCase())) return;
+    setSavingPlace('city');
+    try {
+      const created = await api.create('cities', { name });
+      setCities((list) => [...list, created]);
+    } catch { /* already exists */ } finally { setSavingPlace(''); }
+  };
+
+  /** Saves the typed area into the location master, under the chosen city. */
+  const addLocation = async () => {
+    const name = form.location.trim();
+    const city = cities.find((c) => c.name.toLowerCase() === form.city.trim().toLowerCase());
+    if (!name || !city) return;
+    if (locations.some((l) => l.name.toLowerCase() === name.toLowerCase() && l.cityId?._id === city._id)) return;
+    setSavingPlace('location');
+    try {
+      const created = await api.create('locations', { name, cityId: city._id });
+      setLocations((list) => [...list, { ...created, cityId: { _id: city._id, name: city.name } }]);
+    } catch { /* already exists */ } finally { setSavingPlace(''); }
+  };
+
   // Lets you add a missing facility without leaving the hotel form.
   const addAmenity = async () => {
     const name = newAmenity.trim();
@@ -62,6 +88,9 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
       .catch(() => {});
   }, []);
   const cityLocations = locations.filter((l) => (l.cityId?.name || '') === form.city);
+
+  const knownCity = cities.some((c) => c.name.toLowerCase() === form.city.trim().toLowerCase());
+  const knownLocation = cityLocations.some((l) => l.name.toLowerCase() === form.location.trim().toLowerCase());
 
 
   const save = async (e) => {
@@ -95,6 +124,13 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
             placeholder="Start typing a city…"
             emptyHint="No match — you can still type a city"
           />
+          {form.city.trim() && !knownCity && (
+            <button type="button" onClick={addCity} disabled={savingPlace === 'city'}
+              className="mt-1.5 inline-flex items-center gap-1.5 text-[12px] font-bold text-brand-700 hover:underline disabled:opacity-60">
+              {savingPlace === 'city' ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+              Add “{form.city.trim()}” to the city master
+            </button>
+          )}
         </Field>
         <Field label="Vendor">
           <select className="field" value={form.vendorId || ''} onChange={set('vendorId')}>
@@ -112,6 +148,17 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
             placeholder={form.city ? 'Start typing an area or landmark…' : 'Choose a city first'}
             emptyHint="Keep typing to search the map"
           />
+          {form.location.trim() && !knownLocation && (
+            knownCity ? (
+              <button type="button" onClick={addLocation} disabled={savingPlace === 'location'}
+                className="mt-1.5 inline-flex items-center gap-1.5 text-[12px] font-bold text-brand-700 hover:underline disabled:opacity-60">
+                {savingPlace === 'location' ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                Add “{form.location.trim()}” to the location master
+              </button>
+            ) : (
+              <p className="mt-1.5 text-[11.5px] text-slate-500">Add the city to the master first, then this area can be saved too.</p>
+            )
+          )}
         </Field>
         <Field label="Star category *">
           <select className="field" value={form.starCategory} onChange={set('starCategory')}>
