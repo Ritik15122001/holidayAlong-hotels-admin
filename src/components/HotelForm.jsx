@@ -69,6 +69,7 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
     setBusy(true); setError('');
     const body = { ...form, starCategory: Number(form.starCategory), rating: Number(form.rating) };
     delete body._id; delete body.priceCount; delete body.createdAt; delete body.updatedAt; delete body.__v;
+    if (!body.vendorId) delete body.vendorId;   // '' cannot cast to an ObjectId
     try {
       const saved = hotel?._id ? await api.updateHotel(hotel._id, body) : await api.createHotel(body);
       onSaved(saved);
