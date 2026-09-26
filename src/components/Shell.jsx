@@ -29,10 +29,10 @@ export default function Shell() {
 
   const SidebarBody = (
     <>
-      <div className="px-5 py-5">
+      <div className="shrink-0 px-5 py-5">
         <Wordmark />
       </div>
-      <nav className="flex-1 space-y-1 px-3">
+      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pb-2">
         {nav.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} end={to === '/'}
             className={({ isActive }) => `flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium transition ${
@@ -41,7 +41,7 @@ export default function Shell() {
           </NavLink>
         ))}
       </nav>
-      <button onClick={logout} className="mx-3 mb-4 flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium text-slate-500 transition hover:bg-slate-50 hover:text-slate-900">
+      <button onClick={logout} className="mx-3 mb-4 shrink-0 flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium text-slate-500 transition hover:bg-slate-50 hover:text-slate-900">
         <LogOut size={17} /> Sign out
       </button>
     </>

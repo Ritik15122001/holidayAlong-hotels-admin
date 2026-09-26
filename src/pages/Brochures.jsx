@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, FileText, Loader2, ExternalLink } from 'lucide-react';
-import { api } from '../api';
+import { useEffect, useRef, useState } from 'react';
+import { Plus, Pencil, Trash2, FileText, Loader2, ExternalLink, Upload } from 'lucide-react';
+import { api, uploadFiles } from '../api';
 import { Modal, Field, Empty, StatusBadge, confirmDelete } from '../components/ui.jsx';
 
 const BLANK = { title: '', region: '', fileUrl: '', sortOrder: 0, status: 'Active' };
@@ -75,14 +75,27 @@ function BrochureForm({ row, onClose, onSaved }) {
   const [form, setForm] = useState({ ...BLANK, ...row });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const fileRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const pickFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setUploading(true); setError('');
+    try {
+      const [url] = await uploadFiles([file]);
+      setForm((f) => ({ ...f, fileUrl: url, title: f.title || file.name.replace(/\.[^.]+$/, '') }));
+    } catch (err) { setError(err.message); } finally { setUploading(false); }
+  };
 
   const save = async () => {
     setBusy(true); setError('');
     try {
       const body = { title: form.title.trim(), region: form.region.trim(), fileUrl: form.fileUrl.trim(), sortOrder: Number(form.sortOrder) || 0, status: form.status };
       if (!body.title) throw new Error('Title is required');
-      if (!body.fileUrl) throw new Error('A PDF link is required');
+      if (!body.fileUrl) throw new Error('Upload a file or paste a link');
       if (editing) await api.update('brochures', row._id, body);
       else await api.create('brochures', body);
       onSaved();
@@ -104,9 +117,19 @@ function BrochureForm({ row, onClose, onSaved }) {
         <Field label="Region / grouping">
           <input className="field" value={form.region} onChange={set('region')} placeholder="North East, Rajasthan…" />
         </Field>
-        <Field label="PDF link *">
-          <input className="field" value={form.fileUrl} onChange={set('fileUrl')} placeholder="https://…/brochure.pdf" />
-          <p className="mt-1.5 text-[11.5px] text-slate-500">Paste a public link to the PDF (Drive, Dropbox or your own hosting).</p>
+        <Field label="File *">
+          <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-[13px] font-semibold text-slate-600 transition hover:border-brand-400 hover:text-brand-700 disabled:opacity-60">
+            {uploading ? <><Loader2 size={16} className="animate-spin" /> Uploading…</> : <><Upload size={16} /> {form.fileUrl ? 'Replace file' : 'Upload a PDF or Word file'}</>}
+          </button>
+          <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,application/pdf" onChange={pickFile} className="hidden" />
+          {form.fileUrl && (
+            <p className="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-emerald-700">
+              <FileText size={12} /> <a href={form.fileUrl} target="_blank" rel="noreferrer" className="truncate hover:underline">{form.fileUrl.split('/').pop()}</a>
+            </p>
+          )}
+          <input className="field mt-2" value={form.fileUrl} onChange={set('fileUrl')} placeholder="…or paste a link instead" />
+          <p className="mt-1.5 text-[11.5px] text-slate-500">PDF, DOC or DOCX up to 25 MB. Uploaded files download straight away.</p>
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Sort order"><input type="number" className="field" value={form.sortOrder} onChange={set('sortOrder')} /></Field>

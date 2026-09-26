@@ -7,7 +7,7 @@ const SIZE = { sm: 'h-6', md: 'h-8', lg: 'h-10' };
 export function Wordmark({ size = 'md', tag = 'Admin panel', className = '' }) {
   return (
     <span className={`block ${className}`}>
-      <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Holiday Along Hotels" width="560" height="121"
+      <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Holiday Along Hotels" width="560" height="173"
         className={`${SIZE[size] || SIZE.md} w-auto max-w-full select-none`} />
       {tag && (
         <span className="mt-2 block text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400">
