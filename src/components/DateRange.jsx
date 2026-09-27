@@ -28,16 +28,31 @@ export default function DateRange({ from, to, onChange, placeholder = 'Pick a da
     return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey); };
   }, []);
 
-  // keep the popover inside the viewport
+  /** Nearest scrolling ancestor — a drawer clips horizontally, not just the window. */
+  const bounds = () => {
+    let el = boxRef.current?.parentElement;
+    while (el && el !== document.body) {
+      const o = getComputedStyle(el);
+      if (/(auto|scroll|hidden)/.test(o.overflowY) || /(auto|scroll|hidden)/.test(o.overflowX)) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0) return { left: r.left, right: r.right, width: r.width };
+      }
+      el = el.parentElement;
+    }
+    return { left: 0, right: window.innerWidth, width: window.innerWidth };
+  };
+
+  // keep the popover inside whatever actually clips it
   useEffect(() => {
     if (!open || !popRef.current) return;
     setOffset(0);
     const id = requestAnimationFrame(() => {
       const r = popRef.current?.getBoundingClientRect();
       if (!r) return;
-      const pad = 12;
-      if (r.right > window.innerWidth - pad) setOffset(Math.round(window.innerWidth - pad - r.right));
-      else if (r.left < pad) setOffset(Math.round(pad - r.left));
+      const b = bounds();
+      const pad = 10;
+      if (r.right > b.right - pad) setOffset(Math.round(b.right - pad - r.right));
+      else if (r.left < b.left + pad) setOffset(Math.round(b.left + pad - r.left));
     });
     return () => cancelAnimationFrame(id);
   }, [open, months, flip]);
@@ -46,7 +61,8 @@ export default function DateRange({ from, to, onChange, placeholder = 'Pick a da
     if (!open && boxRef.current) {
       const r = boxRef.current.getBoundingClientRect();
       const below = window.innerHeight - r.bottom;
-      setMonths(window.innerWidth >= 640 && Math.max(below, r.top) >= 380 ? 2 : 1);
+      // two months need ~690px of usable width, otherwise show one
+      setMonths(bounds().width >= 700 && Math.max(below, r.top) >= 380 ? 2 : 1);
       setFlip(below < r.top);
     }
     setOpen((v) => !v);
@@ -75,7 +91,7 @@ export default function DateRange({ from, to, onChange, placeholder = 'Pick a da
 
       {open && (
         <div ref={popRef} style={{ marginLeft: offset }}
-          className={`absolute left-0 z-50 max-h-[78vh] max-w-[calc(100vw-1.5rem)] overflow-auto rounded-xl border border-slate-200 bg-white p-3 shadow-lift ${flip ? 'bottom-full mb-2' : 'top-full mt-2'}`}>
+          className={`absolute left-0 z-50 max-h-[78vh] max-w-full overflow-auto rounded-xl border border-slate-200 bg-white p-3 shadow-lift ${flip ? 'bottom-full mb-2' : 'top-full mt-2'}`}>
           <DayPicker
             mode="range"
             numberOfMonths={months}
