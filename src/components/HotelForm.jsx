@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Trash2, Plus, Loader2, ImagePlus } from 'lucide-react';
+import { Trash2, Plus, Loader2, ImagePlus, FileText, Upload } from 'lucide-react';
 import { iconFor } from '../lib/icons.js';
 import Autocomplete from './Autocomplete.jsx';
 import { searchPlaces } from '../lib/places.js';
@@ -10,7 +10,7 @@ import { Drawer, Field, Spinner } from './ui.jsx';
 const blank = {
   name: '', city: '', location: '', starCategory: 4, description: '', address: '',
   phone: '', email: '', website: '', rating: 4.5, checkIn: '14:00', checkOut: '11:00',
-  amenities: [], images: [], vendorId: '', status: 'Active',
+  amenities: [], images: [], documents: [], vendorId: '', status: 'Active',
 };
 
 export default function HotelForm({ open, hotel, onClose, onSaved }) {
@@ -18,6 +18,24 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
   const fileRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const docRef = useRef(null);
+  const [docBusy, setDocBusy] = useState(false);
+  const [docDrag, setDocDrag] = useState(false);
+  const [docError, setDocError] = useState('');
+
+  const sendDocs = async (files) => {
+    if (!files.length) return;
+    setDocBusy(true); setDocError('');
+    try {
+      const urls = await uploadFiles(files);
+      setForm((f) => ({
+        ...f,
+        documents: [...(f.documents || []), ...urls.map((url, i) => ({ name: files[i].name, url, size: files[i].size }))],
+      }));
+    } catch (err) { setDocError(err.message); } finally { setDocBusy(false); }
+  };
+  const pickDocs = (e) => { const files = [...(e.target.files || [])]; e.target.value = ''; sendDocs(files); };
+  const onDropDocs = (e) => { e.preventDefault(); setDocDrag(false); sendDocs([...(e.dataTransfer?.files || [])]); };
   const [imgError, setImgError] = useState('');
 
   const sendFiles = async (files) => {
@@ -244,6 +262,42 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
               ))}
             </div>
           )}
+        </Field>
+
+        <Field label="Documents" className="col-span-2">
+          <button type="button" onClick={() => docRef.current?.click()} disabled={docBusy}
+            onDragOver={(e) => { e.preventDefault(); setDocDrag(true); }}
+            onDragLeave={() => setDocDrag(false)}
+            onDrop={onDropDocs}
+            className={`flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-5 text-[13px] font-semibold transition disabled:opacity-60 ${
+              docDrag ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-300 bg-slate-50 text-slate-600 hover:border-brand-400 hover:text-brand-700'}`}>
+            {docBusy ? (
+              <><Loader2 size={18} className="animate-spin" /> Uploading…</>
+            ) : (
+              <>
+                <Upload size={18} />
+                Drag rate sheets, contracts or brochures here
+                <span className="text-[11.5px] font-normal text-slate-500">or click to browse · PDF, Word or images</span>
+              </>
+            )}
+          </button>
+          <input ref={docRef} type="file" multiple onChange={pickDocs} className="hidden"
+            accept=".pdf,.doc,.docx,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+          {docError && <p className="mt-1.5 rounded-lg bg-red-50 px-3 py-2 text-[12.5px] text-red-700">{docError}</p>}
+          {(form.documents || []).length > 0 && (
+            <ul className="mt-2.5 space-y-1.5">
+              {form.documents.map((doc, i) => (
+                <li key={doc.url + i} className="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2">
+                  <FileText size={15} className="shrink-0 text-brand-600" />
+                  <a href={doc.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate text-[12.5px] font-semibold text-slate-800 hover:text-brand-700">{doc.name || doc.url.split('/').pop()}</a>
+                  {doc.size > 0 && <span className="shrink-0 text-[11px] text-slate-400">{Math.round(doc.size / 1024)} KB</span>}
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, documents: f.documents.filter((_, j) => j !== i) }))}
+                    className="shrink-0 rounded p-1 text-slate-400 hover:text-red-600"><Trash2 size={13} /></button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-1.5 text-[11.5px] text-slate-500">These appear on the hotel's page on the website.</p>
         </Field>
 
         {error && <p className="col-span-2 rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-700">{error}</p>}
