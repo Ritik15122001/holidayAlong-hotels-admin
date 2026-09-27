@@ -93,7 +93,7 @@ export default function Leads() {
       </div>
 
       {view && (
-        <Modal open onClose={() => setView(null)} title="Booking request" width="max-w-lg"
+        <Modal open onClose={() => setView(null)} title="Booking request" width="max-w-xl"
           footer={<>
             <select value={view.status} onChange={(e) => change(view, e.target.value)} className="field !w-auto">
               {STATUSES.map((s) => <option key={s}>{s}</option>)}
@@ -105,21 +105,28 @@ export default function Leads() {
               <p className="text-base font-bold text-slate-900">{view.name}</p>
               <LeadBadge status={view.status} />
             </div>
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[13px]">
+            <dl className="grid grid-cols-1 gap-x-4 gap-y-2.5 text-[13px] sm:grid-cols-2">
               {[
-                ['Email', view.email], ['Phone', view.phone],
+                ['Guest Name', view.name],
+                ['Hotel Name', view.hotelName || view.hotelId?.name || '—'],
+                ['First check-in', fmtDate(view.checkIn)], ['First check-out', fmtDate(view.checkOut)],
+                ['Re-check-in', view.reCheckIn ? fmtDate(view.reCheckIn) : '—'],
+                ['Re-check-out', view.reCheckOut ? fmtDate(view.reCheckOut) : '—'],
+                ['Total No. of Nights', view.nights ?? nights(view)],
+                ['No. of Adults (12+ Years)', view.adults],
+                ['No. of Rooms', view.rooms],
+                ['No. Of Extra Beds', view.extraBeds ?? 0],
+                ['No. of Child with Bed', view.childWithBed ?? 0],
+                ['No. of Child without Bed', view.childNoBedAges || view.childNoBed || 0],
+                ['Room Type', view.roomType || '—'], ['Meal Plan', view.mealPlan || '—'],
+                ['Extra Inclusions', view.extraInclusions || '—'],
+                ['Total Amount Payable To You', view.totalAmount || '—'],
                 ['Submitted by', view.userName], ['Account email', view.userEmail],
-                ['Alternate phone', view.altPhone], ['Created', fmtDate(view.createdAt)],
-                ['Address', view.address], ['City', view.city],
-                ['State', view.state], ['Country', view.country],
-                ['Hotel', view.hotelName || view.hotelId?.name || '—'], ['Nights', nights(view)],
-                ['Check-in', fmtDate(view.checkIn)], ['Check-out', fmtDate(view.checkOut)],
-                ['Rooms', view.rooms], ['Guests', `${view.adults} adults, ${view.children} children`],
-                ['Room type', view.roomType || 'Any'], ['Meal plan', view.mealPlan || 'Any'],
+                ['Received', fmtDate(view.createdAt)],
               ].map(([k, v]) => (
                 <div key={k}>
                   <dt className="text-[11px] uppercase tracking-wide text-slate-400">{k}</dt>
-                  <dd className="font-medium text-slate-800">{v || '—'}</dd>
+                  <dd className="font-medium text-slate-800">{v === 0 || v ? v : '—'}</dd>
                 </div>
               ))}
             </dl>
