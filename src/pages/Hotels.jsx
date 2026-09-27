@@ -54,7 +54,7 @@ export default function Hotels() {
                   <p className="text-sm font-bold text-slate-900">{h.name}</p>
                   <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-slate-500">
                     {h.location}, {h.city}
-                    <span className="inline-flex items-center gap-0.5 text-amber-500"><Star size={11} className="fill-amber-500" />{h.starCategory} Star</span>
+                    <span className="inline-flex items-center gap-0.5 text-amber-500"><Star size={11} className="fill-amber-500" />{h.starCategory}</span>
                   </p>
                   <div className="mt-1.5 flex items-center gap-1.5">
                     <StatusBadge status={h.status} />

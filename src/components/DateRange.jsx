@@ -59,14 +59,19 @@ export default function DateRange({ from, to, onChange, placeholder = 'Pick a da
 
   const toggle = () => {
     if (!open && boxRef.current) {
-      const r = boxRef.current.getBoundingClientRect();
-      const below = window.innerHeight - r.bottom;
       // two months need ~690px of usable width, otherwise show one
-      setMonths(bounds().width >= 700 && Math.max(below, r.top) >= 380 ? 2 : 1);
-      setFlip(below < r.top);
+      setMonths(bounds().width >= 700 ? 2 : 1);
+      setFlip(false);          // always open downward; the drawer scrolls to it
     }
     setOpen((v) => !v);
   };
+
+  // bring the calendar into view inside a scrolling drawer
+  useEffect(() => {
+    if (!open) return;
+    const id = setTimeout(() => popRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 60);
+    return () => clearTimeout(id);
+  }, [open, months]);
 
   const pick = (next) => {
     if (!next?.from) return;

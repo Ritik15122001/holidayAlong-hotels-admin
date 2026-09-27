@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Trash2, Plus, Loader2, ImagePlus, FileText, Upload } from 'lucide-react';
 import { iconFor } from '../lib/icons.js';
+import { HOTEL_CATEGORIES } from '../lib/categories.js';
 import Autocomplete from './Autocomplete.jsx';
 import { searchPlaces } from '../lib/places.js';
 import { api, uploadFiles } from '../api';
@@ -8,7 +9,7 @@ import { Drawer, Field, Spinner } from './ui.jsx';
 
 
 const blank = {
-  name: '', city: '', location: '', starCategory: 4, description: '', address: '',
+  name: '', city: '', location: '', starCategory: '3 Star', description: '', address: '',
   phone: '', email: '', website: '', rating: 4.5, checkIn: '14:00', checkOut: '11:00',
   amenities: [], images: [], documents: [], vendorId: '', status: 'Active',
 };
@@ -120,7 +121,7 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
   const save = async (e) => {
     e.preventDefault();
     setBusy(true); setError('');
-    const body = { ...form, starCategory: Number(form.starCategory), rating: Number(form.rating) };
+    const body = { ...form, rating: Number(form.rating) };
     delete body._id; delete body.priceCount; delete body.createdAt; delete body.updatedAt; delete body.__v;
     if (!body.vendorId) delete body.vendorId;   // '' cannot cast to an ObjectId
     try {
@@ -184,9 +185,9 @@ export default function HotelForm({ open, hotel, onClose, onSaved }) {
             )
           )}
         </Field>
-        <Field label="Star category *">
+        <Field label="Category *">
           <select className="field" value={form.starCategory} onChange={set('starCategory')}>
-            {[5, 4, 3, 2, 1].map((s) => <option key={s} value={s}>{s} Star</option>)}
+            {HOTEL_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </Field>
         <Field label="Status">
