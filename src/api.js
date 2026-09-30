@@ -41,6 +41,7 @@ export const api = {
   hotelPrices: (id) => req(`${A}/hotels/${id}/prices`),
   createPrice: (id, b) => req(`${A}/hotels/${id}/prices`, { method: 'POST', body: b }),
   bulkPrices: (id, rows) => req(`${A}/hotels/${id}/prices/bulk`, { method: 'POST', body: { rows } }),
+  bulkVendors: (rows) => req(`${A}/vendors/bulk`, { method: 'POST', body: { rows } }),
   updatePrice: (id, b) => req(`${A}/prices/${id}`, { method: 'PUT', body: b }),
   deletePrice: (id) => req(`${A}/prices/${id}`, { method: 'DELETE' }),
   list: (res) => req(`${A}/${res}`),

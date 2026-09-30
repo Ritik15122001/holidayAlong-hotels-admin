@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { api } from '../api';
 import { Drawer, Field, Empty, StatusBadge, Pager, confirmDelete } from '../components/ui.jsx';
+import VendorImport from '../components/VendorImport.jsx';
 
 export const VENDOR_TYPES = ['Cab', 'Hotel', 'Flight', 'Bus', 'Activities', 'Cruises', 'Visa', 'Insurance'];
 
@@ -62,6 +63,8 @@ export default function Vendors() {
         <span className="text-[12px] text-slate-500">{total} vendor{total === 1 ? '' : 's'}</span>
         <button onClick={() => setEditing({})} className="btn-primary ml-auto !py-2.5"><Plus size={15} /> Add vendor</button>
       </div>
+
+      <VendorImport onImported={load} />
 
       <div className="card overflow-hidden">
         {rows === null ? (
