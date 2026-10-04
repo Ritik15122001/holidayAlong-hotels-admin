@@ -130,6 +130,21 @@ export default function Leads() {
                 </div>
               ))}
             </dl>
+            <div className={`rounded-lg p-3 text-[12.5px] ${
+              view.mailedAt ? 'bg-emerald-50 text-emerald-800'
+                : view.mailError === 'smtp_not_configured' ? 'bg-slate-50 text-slate-600'
+                : 'bg-amber-50 text-amber-800'}`}>
+              <p className="text-[11px] uppercase tracking-wide opacity-70">Mail to hotel</p>
+              <p className="mt-0.5 font-semibold">
+                {view.mailedAt
+                  ? `Sent to ${view.mailedTo} on ${fmtDate(view.mailedAt)}`
+                  : view.mailError === 'smtp_not_configured' ? 'Not sent — no mail server configured'
+                  : view.mailError === 'hotel_has_no_email' ? 'Not sent — this hotel has no email address saved'
+                  : view.mailError ? `Not sent — ${view.mailError}`
+                  : 'Not sent'}
+              </p>
+            </div>
+
             {view.message && (
               <div className="rounded-lg bg-slate-50 p-3">
                 <p className="text-[11px] uppercase tracking-wide text-slate-400">Special requests</p>
