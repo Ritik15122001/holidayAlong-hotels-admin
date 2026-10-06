@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building2, BedDouble, Utensils, MessageSquare, Users, LogOut, Menu, X, MapPin, Map, Briefcase, FileText, ScrollText, ConciergeBell } from 'lucide-react';
+import { LayoutDashboard, Building2, BedDouble, Utensils, MessageSquare, Users, LogOut, Menu, X, MapPin, Map, Briefcase, FileText, ScrollText, ConciergeBell, Wallet, FolderOpen} from 'lucide-react';
 import { Wordmark } from './Logo.jsx';
 import { useAuth } from '../store/useAdmin';
 
@@ -17,6 +17,8 @@ const nav = [
   { to: '/formats', label: 'Formats', icon: ScrollText },
   { to: '/leads', label: 'Bookings', icon: MessageSquare },
   { to: '/users', label: 'Users', icon: Users },
+  { to: '/finance', label: 'Expenses & P&L', icon: Wallet },
+  { to: '/documents', label: 'Important documents', icon: FolderOpen },
 ];
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://www.htlr.holidayalong.com/';

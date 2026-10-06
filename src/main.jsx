@@ -16,6 +16,8 @@ const Vendors = lazy(() => import('./pages/Vendors.jsx'));
 const Brochures = lazy(() => import('./pages/Brochures.jsx'));
 const Formats = lazy(() => import('./pages/Formats.jsx'));
 const Amenities = lazy(() => import('./pages/Amenities.jsx'));
+const Finance = lazy(() => import('./pages/Finance.jsx'));
+const Documents = lazy(() => import('./pages/Documents.jsx'));
 
 const Loading = () => <div className="grid h-64 place-items-center"><div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-navy-900" /></div>;
 const S = (el) => <Suspense fallback={<Loading />}>{el}</Suspense>;
@@ -38,6 +40,8 @@ function App() {
         <Route path="/formats" element={S(<Formats />)} />
         <Route path="/leads" element={S(<Leads />)} />
         <Route path="/users" element={S(<UsersPage />)} />
+        <Route path="/finance" element={S(<Finance />)} />
+        <Route path="/documents" element={S(<Documents />)} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

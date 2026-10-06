@@ -64,6 +64,20 @@ export const api = {
   amenities: () => req(`${A}/amenities`),
   cities: () => req(`${A}/cities`),
   locations: () => req(`${A}/locations`),
+
+  // Finance — expenses, income and the P&L statement
+  finEntries: (p) => req(`${A}/finance/entries?` + new URLSearchParams(p)),
+  finSummary: (p) => req(`${A}/finance/summary?` + new URLSearchParams(p)),
+  finCategories: () => req(`${A}/finance/categories`),
+  createFinEntry: (b) => req(`${A}/finance/entries`, { method: 'POST', body: b }),
+  updateFinEntry: (id, b) => req(`${A}/finance/entries/${id}`, { method: 'PUT', body: b }),
+  deleteFinEntry: (id) => req(`${A}/finance/entries/${id}`, { method: 'DELETE' }),
+
+  // Shared document library
+  documents: (p) => req(`${A}/documents?` + new URLSearchParams(p || {})),
+  createDocument: (b) => req(`${A}/documents`, { method: 'POST', body: b }),
+  updateDocument: (id, b) => req(`${A}/documents/${id}`, { method: 'PUT', body: b }),
+  deleteDocument: (id) => req(`${A}/documents/${id}`, { method: 'DELETE' }),
 };
 
 export const money = (n, c = 'INR') => (n == null ? '—' : ({ INR: '₹', AED: 'AED ', USD: '$' }[c] || '') + Number(n).toLocaleString('en-IN'));
