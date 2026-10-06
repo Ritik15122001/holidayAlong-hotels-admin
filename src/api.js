@@ -74,6 +74,12 @@ export const api = {
   deleteFinEntry: (id) => req(`${A}/finance/entries/${id}`, { method: 'DELETE' }),
 
   // Shared document library
+  me: () => req(`${A}/me`),
+  staff: () => req(`${A}/staff`),
+  createStaff: (b) => req(`${A}/staff`, { method: 'POST', body: b }),
+  updateStaff: (id, b) => req(`${A}/staff/${id}`, { method: 'PUT', body: b }),
+  deleteStaff: (id) => req(`${A}/staff/${id}`, { method: 'DELETE' }),
+
   documents: (p) => req(`${A}/documents?` + new URLSearchParams(p || {})),
   createDocument: (b) => req(`${A}/documents`, { method: 'POST', body: b }),
   updateDocument: (id, b) => req(`${A}/documents/${id}`, { method: 'PUT', body: b }),

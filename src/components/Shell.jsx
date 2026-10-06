@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building2, BedDouble, Utensils, MessageSquare, Users, LogOut, Menu, X, MapPin, Map, Briefcase, FileText, ScrollText, ConciergeBell, Wallet, FolderOpen} from 'lucide-react';
+import { LayoutDashboard, Building2, BedDouble, Utensils, MessageSquare, Users, LogOut, Menu, X, MapPin, Map, Briefcase, FileText, ScrollText, ConciergeBell, Wallet, FolderOpen, ShieldCheck} from 'lucide-react';
 import { Wordmark } from './Logo.jsx';
 import { useAuth } from '../store/useAdmin';
 
+// `area` matches the server's own allow list, so the menu can never offer
+// something the API would refuse.
 const nav = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/hotels', label: 'Hotels', icon: Building2 },
-  { to: '/cities', label: 'Cities', icon: Map },
-  { to: '/locations', label: 'Locations', icon: MapPin },
-  { to: '/amenities', label: 'Amenities', icon: ConciergeBell },
-  { to: '/room-types', label: 'Room Types', icon: BedDouble },
-  { to: '/meal-plans', label: 'Meal Plans', icon: Utensils },
-  { to: '/vendors', label: 'Vendors', icon: Briefcase },
-  { to: '/brochures', label: 'Packages', icon: FileText },
-  { to: '/formats', label: 'Formats', icon: ScrollText },
-  { to: '/leads', label: 'Bookings', icon: MessageSquare },
-  { to: '/users', label: 'Users', icon: Users },
-  { to: '/finance', label: 'Expenses & P&L', icon: Wallet },
-  { to: '/documents', label: 'Important documents', icon: FolderOpen },
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard, area: 'stats' },
+  { to: '/hotels', label: 'Hotels', icon: Building2, area: 'hotels' },
+  { to: '/cities', label: 'Cities', icon: Map, area: 'cities' },
+  { to: '/locations', label: 'Locations', icon: MapPin, area: 'locations' },
+  { to: '/amenities', label: 'Amenities', icon: ConciergeBell, area: 'amenities' },
+  { to: '/room-types', label: 'Room Types', icon: BedDouble, area: 'room-types' },
+  { to: '/meal-plans', label: 'Meal Plans', icon: Utensils, area: 'meal-plans' },
+  { to: '/vendors', label: 'Vendors', icon: Briefcase, area: 'vendors' },
+  { to: '/brochures', label: 'Packages', icon: FileText, area: 'brochures' },
+  { to: '/formats', label: 'Formats', icon: ScrollText, area: 'formats' },
+  { to: '/leads', label: 'Bookings', icon: MessageSquare, area: 'leads' },
+  { to: '/users', label: 'Users', icon: Users, area: 'users' },
+  { to: '/finance', label: 'Expenses & P&L', icon: Wallet, area: 'finance' },
+  { to: '/documents', label: 'Important documents', icon: FolderOpen, area: 'documents' },
+  { to: '/staff', label: 'Staff & roles', icon: ShieldCheck, area: 'staff' },
 ];
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://www.htlr.holidayalong.com/';
@@ -26,8 +29,14 @@ const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://www.htlr.holidayalong
 export default function Shell() {
   const [open, setOpen] = useState(false);
   const logout = useAuth((s) => s.logout);
+  const me = useAuth((s) => s.me);
+  const can = useAuth((s) => s.can);
+  const refreshMe = useAuth((s) => s.refreshMe);
   const { pathname } = useLocation();
   useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => { refreshMe(); }, [refreshMe]);
+
+  const visible = nav.filter((n) => can(n.area));
 
   const SidebarBody = (
     <>
@@ -35,7 +44,7 @@ export default function Shell() {
         <Wordmark />
       </div>
       <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pb-2">
-        {nav.map(({ to, label, icon: Icon }) => (
+        {visible.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} end={to === '/'}
             className={({ isActive }) => `flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium transition ${
               isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
@@ -43,6 +52,12 @@ export default function Shell() {
           </NavLink>
         ))}
       </nav>
+      {me && (
+        <div className="mx-3 mb-1 shrink-0 rounded-lg bg-slate-50 px-3 py-2.5">
+          <p className="truncate text-[13px] font-bold text-slate-900">{me.name || me.username}</p>
+          <p className="text-[11.5px] text-slate-500">{me.role}</p>
+        </div>
+      )}
       <button onClick={logout} className="mx-3 mb-4 shrink-0 flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium text-slate-500 transition hover:bg-slate-50 hover:text-slate-900">
         <LogOut size={17} /> Sign out
       </button>

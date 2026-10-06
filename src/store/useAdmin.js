@@ -1,14 +1,45 @@
 import { create } from 'zustand';
 import { api, TOKEN_KEY } from '../api';
 
-export const useAuth = create((set) => ({
+const ME_KEY = 'ha_admin_me';
+const savedMe = () => { try { return JSON.parse(localStorage.getItem(ME_KEY) || 'null'); } catch { return null; } };
+
+export const useAuth = create((set, get) => ({
   token: localStorage.getItem(TOKEN_KEY) || '',
+  // { name, username, role, areas } — areas is null for a Super Admin
+  me: savedMe(),
+
   login: async (username, password) => {
-    const { token } = await api.login({ username, password });
+    const { token, user } = await api.login({ username, password });
     localStorage.setItem(TOKEN_KEY, token);
-    set({ token });
+    set({ token, me: user || null });
+    get().refreshMe();
   },
-  logout: () => { localStorage.removeItem(TOKEN_KEY); set({ token: '' }); },
+
+  /** Re-read the profile so a role change takes effect without a new login. */
+  refreshMe: async () => {
+    try {
+      const me = await api.me();
+      localStorage.setItem(ME_KEY, JSON.stringify(me));
+      set({ me });
+    } catch (e) {
+      // only an expired or rejected session ends it; a network blip must not
+      if (/unauthor/i.test(e.message)) get().logout();
+    }
+  },
+
+  /** Can this account reach the given area? Super Admin reaches everything. */
+  can: (area) => {
+    const { me } = get();
+    if (!me || me.areas == null) return true;
+    return me.areas.includes(area);
+  },
+
+  logout: () => {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(ME_KEY);
+    set({ token: '', me: null });
+  },
 }));
 
 export const useHotels = create((set, get) => ({

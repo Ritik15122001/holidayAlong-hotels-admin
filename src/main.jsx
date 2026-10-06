@@ -18,9 +18,22 @@ const Formats = lazy(() => import('./pages/Formats.jsx'));
 const Amenities = lazy(() => import('./pages/Amenities.jsx'));
 const Finance = lazy(() => import('./pages/Finance.jsx'));
 const Documents = lazy(() => import('./pages/Documents.jsx'));
+const Staff = lazy(() => import('./pages/Staff.jsx'));
 
 const Loading = () => <div className="grid h-64 place-items-center"><div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-navy-900" /></div>;
 const S = (el) => <Suspense fallback={<Loading />}>{el}</Suspense>;
+
+/** Typing a URL must not reach an area this account cannot use. */
+function Gate({ area, children }) {
+  const can = useAuth((s) => s.can);
+  if (can(area)) return children;
+  return (
+    <div className="card p-12 text-center">
+      <p className="text-[17px] font-bold text-slate-900">No access to this area</p>
+      <p className="mt-1.5 text-[13.5px] text-slate-500">Your account does not have rights here. Ask a Super Admin if you need them.</p>
+    </div>
+  );
+}
 
 function App() {
   const token = useAuth((s) => s.token);
@@ -29,19 +42,20 @@ function App() {
     <Routes>
       <Route element={<Shell />}>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/hotels" element={S(<Hotels />)} />
-        <Route path="/cities" element={S(<Places kind="cities" />)} />
-        <Route path="/locations" element={S(<Places kind="locations" />)} />
-        <Route path="/amenities" element={S(<Amenities />)} />
-        <Route path="/room-types" element={S(<Masters kind="room-types" />)} />
-        <Route path="/meal-plans" element={S(<Masters kind="meal-plans" />)} />
-        <Route path="/vendors" element={S(<Vendors />)} />
-        <Route path="/brochures" element={S(<Brochures />)} />
-        <Route path="/formats" element={S(<Formats />)} />
-        <Route path="/leads" element={S(<Leads />)} />
-        <Route path="/users" element={S(<UsersPage />)} />
-        <Route path="/finance" element={S(<Finance />)} />
-        <Route path="/documents" element={S(<Documents />)} />
+        <Route path="/hotels" element={S(<Gate area="hotels"><Hotels /></Gate>)} />
+        <Route path="/cities" element={S(<Gate area="cities"><Places kind="cities" /></Gate>)} />
+        <Route path="/locations" element={S(<Gate area="locations"><Places kind="locations" /></Gate>)} />
+        <Route path="/amenities" element={S(<Gate area="amenities"><Amenities /></Gate>)} />
+        <Route path="/room-types" element={S(<Gate area="room-types"><Masters kind="room-types" /></Gate>)} />
+        <Route path="/meal-plans" element={S(<Gate area="meal-plans"><Masters kind="meal-plans" /></Gate>)} />
+        <Route path="/vendors" element={S(<Gate area="vendors"><Vendors /></Gate>)} />
+        <Route path="/brochures" element={S(<Gate area="brochures"><Brochures /></Gate>)} />
+        <Route path="/formats" element={S(<Gate area="formats"><Formats /></Gate>)} />
+        <Route path="/leads" element={S(<Gate area="leads"><Leads /></Gate>)} />
+        <Route path="/users" element={S(<Gate area="users"><UsersPage /></Gate>)} />
+        <Route path="/finance" element={S(<Gate area="finance"><Finance /></Gate>)} />
+        <Route path="/documents" element={S(<Gate area="documents"><Documents /></Gate>)} />
+        <Route path="/staff" element={S(<Gate area="staff"><Staff /></Gate>)} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
